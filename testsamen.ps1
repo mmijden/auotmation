@@ -9,7 +9,7 @@ Invoke-Command -ComputerName 10.3.0.2 -Credential $dccred -ScriptBlock {
         $Response = Invoke-RestMethod http://10.3.0.40:8085/Staff
         Write-Host $Response 
         
-        foreach ($user in $response.data) {
+        foreach ($user in $Response.data) {
             $voornaam = $user.Voornaam
             $achternaam = $user.Achternaam
             $personeelsnummer = $user.Personeelsnummer

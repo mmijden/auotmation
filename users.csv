@@ -1,0 +1,5 @@
+#TYPE System.Management.Automation.PSCustomObject
+"Voornaam", "Achternaam", "Afdeling"
+"Ben","Paulisen","Finance"
+"Martijn","Boeren","Hr"
+"AD","Bierens","Finance"

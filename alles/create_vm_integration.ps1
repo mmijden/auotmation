@@ -16,23 +16,35 @@ while ($true) {
         $email = $user.Email
         $samAccountName = "$voornaam.$achternaam"
         $wachtwoord = [System.Web.Security.Membership]::GeneratePassword(8,2)
-        $controlegebruiker = Get-ADUser -Filter {SamAccountName -eq $samAccountName}
+        $dccred = New-Object System.Management.Automation.PSCredential ($dccred.UserName, $dccred.Password)
+        $controlegebruiker = Invoke-Command -ComputerName 10.3.0.2 -Credential $dccred -ScriptBlock {
+            $samAccountName = "$using:voornaam.$using:achternaam"
+            Get-ADUser -Filter {SamAccountName -eq $samAccountName}
+        }
 
-        if ($controlegebruiker -eq $null) {
+        if ($controlegebruiker -ne $null) {
+            Write-Host "Fout: Gebruiker $samAccountName bestaat al."
+        } else {
             New-ADUser -Name $voornaam -GivenName $voornaam -Surname $achternaam -SamAccountName $samAccountName -Department $afdeling -UserPrincipalName "$samAccountName@mijden.lan" -Path "OU=$afdeling,DC=mijden,DC=lan" -AccountPassword (ConvertTo-SecureString $wachtwoord -AsPlainText -Force) -Enabled $true -ChangePasswordAtLogon $true
             $vmnaam = "ws-$voornaam$achternaam"
-            $hostname = "ws-$voornaam$achternaam"
-            $wachtwoord = "Mike123"
-            $serverNaamOfIp = "test"
-            $gebruikerdc = $dccred.UserName
-            $domein = "mijden.lan"
-            $ip = "10.2.0.32"
-            $credential = New-Object System.Management.Automation.PSCredential ("admin", $wscred.Password)
+            $vmBestaat = Get-VM -Name $vmnaam -ErrorAction SilentlyContinue
 
-            Connect-VIServer $vcenter -Credential $vcentercred
-            Start-Sleep -Seconds 60
-            $vm = New-VM -Name $vmnaam -Template ws-user-temp -ResourcePool I540703 -Datastore $datastore -Location I540703
-            Write-Host "VM created with name: $vmnaam"
+            if ($vmBestaat -ne $null) {
+                Write-Host "Fout: VM $vmnaam bestaat al."
+            } else {
+                $hostname = "ws-$voornaam$achternaam"
+                $wachtwoord = "Mike123"
+                $serverNaamOfIp = "test"
+                $gebruikerdc = $dccred.UserName
+                $domein = "mijden.lan"
+                $ip = "10.2.0.32"
+                $credential = New-Object System.Management.Automation.PSCredential ("admin", $wscred.Password)
+
+                Connect-VIServer $vcenter -Credential $vcentercred
+                Start-Sleep -Seconds 60
+                $vm = New-VM -Name $vmnaam -Template ws-user-temp -ResourcePool I540703 -Datastore $datastore -Location I540703
+                Write-Host "VM created with name: $vmnaam"
+            }
 
             $emailontvanger = $email
             $emailafzender = "mike.fhict@gmail.com"

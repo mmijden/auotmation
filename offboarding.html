@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offboarden</title>
+</head>
+<body>
+    <form id="offboardForm">
+        <label for="voornaam">Voornaam:</label><br>
+        <input type="text" id="voornaam" name="Voornaam" required><br>
+
+        <label for="Achternaam">Achternaam:</label><br>
+        <input type="text" id="Achternaam" name="Achternaam" required><br>
+
+        <input type="submit" value="Offboarden">
+    </form>
+
+    <script>
+        document.getElementById('offboardForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const voornaam = document.getElementById('voornaam').value.trim();
+            const achternaam = document.getElementById('Achternaam').value.trim();
+
+            try {
+                const response = await fetch('http://10.3.0.40:8085/offboard', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        Voornaam: voornaam,
+                        Achternaam: achternaam
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Offboarding request failed');
+                }
+
+                alert('Offboarding gestart.');
+                this.reset();
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>

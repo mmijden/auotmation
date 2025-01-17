@@ -1,4 +1,3 @@
-# Import benodigde inloggegevens
 $vcenter = "vcenter.netlab.fontysict.nl"
 $vcentercred = Import-Clixml -Path "C:\Users\admin\Documents\vcenter_credentials.xml"
 $dccred = Import-Clixml -Path "C:\Users\admin\Documents\dc_credentials.xml"
@@ -12,7 +11,6 @@ while ($true) {
         
         Write-Host "Start offboarding voor $voornaam $achternaam"
         
-        # VM uitzetten en verwijderen
         Connect-VIServer $vcenter -Credential $vcentercred
         $vm = Get-VM -Name "ws-$voornaam-$achternaam" -ErrorAction SilentlyContinue
         if ($vm) {
@@ -21,11 +19,14 @@ while ($true) {
         }
         Disconnect-VIServer -Server $vcenter -Confirm:$false
 
-        # AD account uitschakelen en verplaatsen
+        $computer = Get-ADComputer -Filter {Name -eq "ws-$voornaam-$achternaam"} -ErrorAction SilentlyContinue
+        if ($computer) {
+            Remove-ADComputer -Identity $computer -Confirm:$false
+        }
+
         $gebruiker = Get-ADUser -Filter {SamAccountName -eq "$voornaam $achternaam"}
         if ($gebruiker) {
-            Disable-ADAccount -Identity $gebruiker
-            Move-ADObject -Identity $gebruiker.DistinguishedName -TargetPath "OU=Disabled Users,DC=mijden,DC=lan"
+            Remove-ADUser -Identity $gebruiker -Confirm:$false
         }
         
         Write-Host "Klaar met $voornaam $achternaam"

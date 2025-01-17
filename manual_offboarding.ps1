@@ -19,18 +19,16 @@ while ($true) {
         }
         Disconnect-VIServer -Server $vcenter -Confirm:$false
 
-        $computer = Get-ADComputer -Filter {Name -eq "ws-$voornaam-$achternaam"} -Credential $dccred -Server "dc.mijden.lan" -ErrorAction SilentlyContinue
-        if ($computer) {
-            Remove-ADComputer -Identity $computer -Credential $dccred -Server "dc.mijden.lan" -Confirm:$false -Force
+
+        Invoke-Command -ComputerName '10.3.0.2' -ScriptBlock { 
+            $computerName = "ws-$using:voornaam-$using:achternaam"
+            Remove-Computer -Name $computerName -Force -RemoveFromDomain
+            Remove-ADUser -Identity "$using:voornaam $using:achternaam" -Confirm:$false
+            Write-Host "Verwijdering van $using:voornaam $using:achternaam is gelukt."
         }
 
-        $gebruiker = Get-ADUser -Filter {SamAccountName -eq "$voornaam $achternaam"}
-        if ($gebruiker) {
-            Remove-ADUser -Identity $gebruiker -Confirm:$false
-        }
-        
-        Write-Host "Klaar met $voornaam $achternaam"
-    }
+        Write-Host "Wacht op gegevens voor offboarding..."
     
     Start-Sleep -Seconds 30
+}
 }

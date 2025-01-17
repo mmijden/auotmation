@@ -19,14 +19,13 @@ while ($true) {
         }
         Disconnect-VIServer -Server $vcenter -Confirm:$false
 
+        # Verwijderen van de computer en de AD-gebruiker lokaal
+        $computerName = "ws-$voornaam-$achternaam"
+        Remove-Computer -Name $computerName -Force -RemoveFromDomain
+        Remove-ADUser -Identity "$voornaam $achternaam" -Confirm:$false
+        Write-Host "Verwijdering van $voornaam $achternaam is gelukt."
 
-        Invoke-Command -ComputerName '10.3.0.2' -ScriptBlock { 
-            $computerName = "ws-$using:voornaam-$using:achternaam"
-            Remove-Computer -Name $computerName -Force -RemoveFromDomain
-            Remove-ADUser -Identity "$using:voornaam $using:achternaam" -Confirm:$false
-            Write-Host "Verwijdering van $using:voornaam $using:achternaam is gelukt."
-        }
-
+        # Wacht op gegevens voor offboarding
         Write-Host "Wacht op gegevens voor offboarding..."
     
     Start-Sleep -Seconds 30

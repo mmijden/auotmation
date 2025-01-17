@@ -95,7 +95,7 @@ while ($true) {
                 Invoke-Command -ComputerName $ipv4Adres -Credential $credential -ScriptBlock {
                     Add-Computer -DomainName $using:domein -Credential $using:dccred -Force -Restart
                 }
-                
+
                 # Send email to user
                 $emailafzender = "mike.fhict@gmail.com"
                 $onderwerp = "Uw nieuwe account"
@@ -108,14 +108,15 @@ Met vriendelijke groet,
 IT-afdeling vd M
 "@
                 $smtpServer = "smtp.gmail.com"
-                $port = 587
+                $port = 25
                 $userName = 'mike.fhict@gmail.com'
                 $password = "lyzd gjuh otjy szdg"
-                [SecureString]$securepassword = $password | ConvertTo-SecureString -AsPlainText -Force
-                $emailcred = New-Object System.Management.Automation.PSCredential -ArgumentList $username, $securepassword
+                
+                # Create simple credentials without secure string
+                $emailcred = [System.Net.NetworkCredential]::new($userName, $password)
                 
                 Send-MailMessage -To $email -From $emailafzender -Subject $onderwerp -Body $body `
-                               -SmtpServer $smtpServer -Port $port -UseSsl -Credential $emailcred
+                               -SmtpServer $smtpServer -Port $port -Credential $emailcred
                 
                 Write-Host "User $samAccountName created with VM $vmnaam and joined to domain"
                 $bestaandeGebruikers += $samAccountName
@@ -132,5 +133,6 @@ IT-afdeling vd M
         Write-Host "Error occurred: $_"
     }
     
+    Write-Host "Wacht op nieuwe invoer van gebruikers..."
     Start-Sleep -Seconds 30
 }

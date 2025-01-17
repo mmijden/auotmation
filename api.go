@@ -14,8 +14,8 @@ type FormData struct {
 }
 
 type OffboardData struct {
-	Voornaam   string `json:"Voornaam" binding:"required"`
-	Achternaam string `json:"Achternaam" binding:"required"`
+	Voornaam   string `form:"Voornaam" binding:"required"`
+	Achternaam string `form:"Achternaam" binding:"required"`
 }
 
 var storedData FormData
@@ -51,11 +51,11 @@ func main() {
 
 	r.POST("/offboard", func(c *gin.Context) {
 		var offboardData OffboardData
-		if err := c.ShouldBindJSON(&offboardData); err != nil {
+		if err := c.ShouldBind(&offboardData); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(http.StatusOK, gin.H{"message": "Offboarding started"})
+		c.JSON(http.StatusOK, gin.H{"message": "Offboarding gestart"})
 	})
 
 	r.Run(":8085")

@@ -6,7 +6,7 @@
     <title>Offboarden</title>
 </head>
 <body>
-    <form id="offboardForm">
+    <form method="POST" action="http://10.3.0.40:8085/offboard">
         <label for="voornaam">Voornaam:</label><br>
         <input type="text" id="voornaam" name="Voornaam" required><br>
 
@@ -15,36 +15,5 @@
 
         <input type="submit" value="Offboarden">
     </form>
-
-    <script>
-        document.getElementById('offboardForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const voornaam = document.getElementById('voornaam').value.trim();
-            const achternaam = document.getElementById('Achternaam').value.trim();
-
-            try {
-                const response = await fetch('http://10.3.0.40:8085/offboard', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        Voornaam: voornaam,
-                        Achternaam: achternaam
-                    })
-                });
-
-                if (!response.ok) {
-                    throw new Error('Offboarding request failed');
-                }
-
-                alert('Offboarding gestart.');
-                this.reset();
-            } catch (error) {
-                alert('Error: ' + error.message);
-            }
-        });
-    </script>
 </body>
 </html>

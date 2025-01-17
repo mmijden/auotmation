@@ -13,11 +13,6 @@ type FormData struct {
 	Email            string `form:"Email" binding:"required"`
 }
 
-type OffboardData struct {
-	Voornaam   string `form:"Voornaam" binding:"required"`
-	Achternaam string `form:"Achternaam" binding:"required"`
-}
-
 var storedData FormData
 
 func main() {
@@ -42,7 +37,7 @@ func main() {
 			return
 		}
 		storedData = formData
-		c.JSON(http.StatusOK, gin.H{"message": "Gegevens ontvangen"})
+		c.JSON(http.StatusOK, gin.H{"message": "Gegevens ontvangen", "data": formData})
 	})
 
 	r.GET("/Staff", func(c *gin.Context) {
@@ -50,12 +45,12 @@ func main() {
 	})
 
 	r.POST("/offboard", func(c *gin.Context) {
-		var offboardData OffboardData
-		if err := c.ShouldBind(&offboardData); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-		c.JSON(http.StatusOK, gin.H{"message": "Offboarding gestart"})
+		voornaam := c.PostForm("Voornaam")
+		achternaam := c.PostForm("Achternaam")
+		c.JSON(http.StatusOK, gin.H{"message": "Offboarding gestart", "data": gin.H{
+			"Voornaam": voornaam,
+			"Achternaam": achternaam,
+		}})
 	})
 
 	r.Run(":8085")

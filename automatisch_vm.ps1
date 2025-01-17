@@ -49,9 +49,11 @@ while ($true) {
                 Start-VM -VM $vmnaam
                 
                 # Wait for VM to get IP
-                Start-Sleep -Seconds 60
-                $vm = Get-VM -Name $vmnaam
-                $ipv4Adres = $vm.Guest.IPAddress | Select-Object -First 1
+                do {
+                    Start-Sleep -Seconds 10
+                    $vm = Get-VM -Name $vmnaam
+                    $ipv4Adres = $vm.Guest.IPAddress | Select-Object -First 1
+                } until ($null -ne $ipv4Adres)
                 
                 Disconnect-VIServer -Server $vcenter -Confirm:$false
                 
@@ -60,6 +62,14 @@ while ($true) {
                 
                 # Configure VM based on department
                 $credential = New-Object System.Management.Automation.PSCredential ("admin", $wscred.Password)
+                
+                # Test connection before attempting to invoke commands
+                $connectionTest = Test-Connection -ComputerName $ipv4Adres -Count 1 -Quiet
+                if (-not $connectionTest) {
+                    Write-Host "Cannot connect to VM at $ipv4Adres. Skipping configuration."
+                    continue
+                }
+
                 Invoke-Command -ComputerName $ipv4Adres -Credential $credential -ScriptBlock {
                     if ($using:afdeling -eq "Hr") {
                         winget install Google.Chrome --accept-package-agreements --accept-source-agreements --silent
@@ -70,14 +80,18 @@ while ($true) {
                     Rename-Computer -NewName $using:hostname -Force -Restart
                 }
                 
-                # Wait for restart and join domain
+                # Wait for restart
+                Start-Sleep -Seconds 240
+                
+                # Wait for VM to be pingable
                 do {
-                    Start-Sleep -Seconds 240
+                    Start-Sleep -Seconds 30
                     $pingResult = Test-Connection -ComputerName $ipv4Adres -Count 1 -Quiet
                 } until ($pingResult)
                 
-                Start-Sleep -Seconds 120
+                Start-Sleep -Seconds 60
                 
+                # Join domain
                 Invoke-Command -ComputerName $ipv4Adres -Credential $credential -ScriptBlock {
                     Add-Computer -DomainName $using:domein -Credential $using:dccred -Force -Restart
                 }

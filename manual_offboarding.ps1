@@ -19,9 +19,9 @@ while ($true) {
         }
         Disconnect-VIServer -Server $vcenter -Confirm:$false
 
-        $computer = Get-ADComputer -Filter {Name -eq "ws-$voornaam-$achternaam"} -ErrorAction SilentlyContinue
+        $computer = Get-ADComputer -Filter {Name -eq "ws-$voornaam-$achternaam"} -Credential $dccred -Server "dc.mijden.lan" -ErrorAction SilentlyContinue
         if ($computer) {
-            Remove-ADComputer -Identity $computer -Confirm:$false
+            Remove-ADComputer -Identity $computer -Credential $dccred -Server "dc.mijden.lan" -Confirm:$false -Force
         }
 
         $gebruiker = Get-ADUser -Filter {SamAccountName -eq "$voornaam $achternaam"}

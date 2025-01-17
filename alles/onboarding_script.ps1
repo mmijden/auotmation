@@ -60,7 +60,7 @@ Invoke-Command -ComputerName 10.3.0.2 -Credential $dccred -ScriptBlock {
                 
                 Start-Sleep -Seconds 90  
 
-                $vm = Get-VM -Name $vmnaam
+               
 
              
                 while ($vm.PowerState -ne 'PoweredOn') {

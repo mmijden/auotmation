@@ -8,6 +8,8 @@ while ($true) {
     $request = $context.Request
     $response = $context.Response
 
+    Write-Host "Received request from: $($request.UserHostAddress)"
+
     # Handle the request
     $dccred = Import-Clixml -Path "C:\Users\admin\Documents\dc_credentials.xml"
     $dccred = New-Object System.Management.Automation.PSCredential ($dccred.UserName, $dccred.Password)
@@ -57,5 +59,6 @@ IT-afdeling vd M
 
     # Respond to the request
     $response.StatusCode = 200
+    $response.StatusDescription = "OK"
     $response.Close()
 }

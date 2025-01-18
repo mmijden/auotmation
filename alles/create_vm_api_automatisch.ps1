@@ -2,7 +2,6 @@ $vcenter = "vcenter.netlab.fontysict.nl"
 $vcentercred = Import-Clixml -Path "C:\Users\admin\Documents\vcenter_credentials.xml"
 $dccred = Import-Clixml -Path "C:\Users\admin\Documents\dc_credentials.xml"
 $wscred = Import-CliXml -Path "C:\Users\admin\Documents\ws_credentials.xml"
-$wscred | Format-List
 
 Set-PowerCLIConfiguration -Scope AllUsers -InvalidCertificateAction Warn
 $datastore = "NIM01-1"
@@ -19,20 +18,35 @@ while ($true) {
         Start-Sleep -Seconds 60
     } else {
         foreach ($user in $response.data) {  
-            # Check for valid data fields
             if ($user.voornaam -and $user.achternaam -and $user.email -and $user.afdeling) {
                 $voornaam = $user.voornaam
                 $achternaam = $user.achternaam
                 $email = $user.email
                 $afdeling = $user.afdeling
 
-                # Check if the user has already been processed
                 if (-not ($processedUsers -contains "$voornaam $achternaam")) {
-                    Write-Host "Eerste gebruiker: Voornaam: $voornaam, Achternaam: $achternaam, Email: $email, Afdeling: $afdeling"
+                    Write-Host "gebruiker: Voornaam: $voornaam, Achternaam: $achternaam, Email: $email, Afdeling: $afdeling"
                     Connect-VIServer $vcenter -Credential $vcentercred
                     Start-Sleep -Seconds 60
 
                     $vmnaam = "ws-$voornaam$achternaam"
+
+                    $existingVM = Get-VM -Name $vmnaam -ErrorAction SilentlyContinue
+                    if ($existingVM) {
+                        Write-Host "VM $vmnaam bestaat al. Overslaan."
+                        Disconnect-VIServer -Server $vcenter -Confirm:$false
+                        Start-Sleep -Seconds 30
+                        continue
+                    }
+
+                    $existingUser = Get-ADUser -Identity "$voornaam $achternaam" -ErrorAction SilentlyContinue
+                    if ($existingUser) {
+                        Write-Host "Gebruiker $voornaam $achternaam bestaat al. Overslaan."
+                        Disconnect-VIServer -Server $vcenter -Confirm:$false
+                        Start-Sleep -Seconds 30
+                        continue
+                    }
+
                     $hostname = "ws-$voornaam$achternaam"
                     $wachtwoord = "Mike123"
                     $serverNaamOfIp = "test"
@@ -56,14 +70,14 @@ while ($true) {
                     Disconnect-VIServer -Server "vcenter.netlab.fontysict.nl" -Confirm:$false
 
                     Invoke-Command -ComputerName $ipv4Adres -Credential $credential -ScriptBlock {
-                        if ($using:user.afdeling -eq "Hr") {
+                        if ($using:afdeling -eq "Hr") {
                             winget install Google.Chrome --accept-package-agreements --accept-source-agreements --silent
                             start-sleep -seconds 30
                             Rename-Computer -NewName $using:hostname -Force -Restart
                         } else {
                             winget search Discord
                             winget install Discord -s msstore --accept-package-agreements --accept-source-agreements --silent
-                            start-sleep -seconds 30
+                            Start-Sleep -seconds 30
                             Rename-Computer -NewName $using:hostname -Force -Restart
                         }
                     }
@@ -73,9 +87,8 @@ while ($true) {
                         $pingResult = Test-Connection -ComputerName $ipv4Adres -Count 1 -Quiet
                     } until ($pingResult)
 
-                    Start-Sleep -Seconds 120  # Wacht nu 120 seconden voordat je de computer aan het domein toevoegt
+                    Start-Sleep -Seconds 120  
 
-                    # Probeer de computer aan het domein toe te voegen met foutafhandeling
                     $domeinToevoegen = Invoke-Command -ComputerName $ipv4Adres -Credential $credential -ScriptBlock {
                         try {
                             Add-Computer -DomainName $using:domein -Credential $using:dccred -Force -Restart

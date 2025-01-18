@@ -12,6 +12,7 @@ $processedUsers = @()
 
 while ($true) {
     $response = Invoke-RestMethod -Uri 'http://10.3.0.40:8085/Staff' -Method Get
+    Write-Host "API Response: $response"  
 
     if (-not $response) {
         Write-Host 'Geen gegevens ontvangen, wacht op gegevens'

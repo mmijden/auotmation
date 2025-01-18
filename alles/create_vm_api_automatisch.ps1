@@ -12,20 +12,21 @@ $processedUsers = @()
 
 while ($true) {
     $response = Invoke-RestMethod -Uri 'http://10.3.0.40:8085/Staff' -Method Get
-    Write-Host "API Response: $response"  
+    Write-Host "API Response: $($response | ConvertTo-Json -Depth 10)"  
 
     if (-not $response) {
         Write-Host 'Geen gegevens ontvangen, wacht op gegevens'
         Start-Sleep -Seconds 60
     } else {
-        foreach ($user in $response) {
+        foreach ($user in $response.data) {  
             # Check for valid data fields
-            if ($user.voornaam -and $user.achternaam -and $user.email) {
+            if ($user.voornaam -and $user.achternaam -and $user.email -and $user.afdeling) {
                 $voornaam = $user.voornaam
                 $achternaam = $user.achternaam
                 $email = $user.email
+                $afdeling = $user.afdeling
 
-                Write-Host "Eerste gebruiker: Voornaam: $voornaam, Achternaam: $achternaam, Email: $email"
+                Write-Host "Eerste gebruiker: Voornaam: $voornaam, Achternaam: $achternaam, Email: $email, Afdeling: $afdeling"
                 Connect-VIServer $vcenter -Credential $vcentercred
                 Start-Sleep -Seconds 60
 
@@ -90,6 +91,9 @@ while ($true) {
 
                 Write-Host "Eerste gebruiker succesvol verwerkt."
                 $processedUsers += "$voornaam $achternaam"
+            } else {
+                Write-Host 'Geen gegevens ontvangen, wacht op gegevens'
+                Start-Sleep -Seconds 30
             }
         }
     }

@@ -28,7 +28,7 @@ while ($true) {
                 $existingVM = Get-VM -Name $vmnaam -ErrorAction SilentlyContinue
                 $existingUser = Get-ADUser -Identity "$voornaam $achternaam" -ErrorAction SilentlyContinue
 
-                if ($existingUser) {
+                if ($null -ne $existingUser) {
                     Write-Host "Gebruiker $voornaam $achternaam bestaat al. Overslaan."
                     Start-Sleep -Seconds 30
                     continue

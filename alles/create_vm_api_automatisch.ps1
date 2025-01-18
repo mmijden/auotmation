@@ -25,14 +25,15 @@ while ($true) {
                 $afdeling = $user.afdeling
 
                 $vmnaam = "ws-$voornaam$achternaam"
-                $existingVM = Get-VM -Name $vmnaam -ErrorAction SilentlyContinue
                 $existingUser = Get-ADUser -Identity "$voornaam $achternaam" -ErrorAction SilentlyContinue
 
-                if ($null -ne $existingUser) {
+                if ($existingUser) {
                     Write-Host "Gebruiker $voornaam $achternaam bestaat al. Overslaan."
                     Start-Sleep -Seconds 30
                     continue
                 }
+
+                $existingVM = Get-VM -Name $vmnaam -ErrorAction SilentlyContinue
 
                 if ($existingVM) {
                     Write-Host "VM $vmnaam bestaat al. Overslaan."

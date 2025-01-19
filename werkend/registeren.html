@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registreren</title>
+</head>
+<body>
+    <form method="POST" action="http://10.3.0.40:8085/submit" 
+    <label for="Personeelsnummer">Personeelsnummer:</label><br>
+
+        <input type="text" id="Personeelsnummer" name="Personeelsnummer" required><br>
+        
+        <label for="voornaam">Voornaam:</label><br>
+
+        <input type="text" id="voornaam" name="Voornaam" required><br>
+
+        <label for="Achternaam">Achternaam:</label><br>
+
+        <input type="text" id="Achternaam" name="Achternaam" required><br>
+
+        <label for="Afdeling">Afdeling:</label><br>
+	<select name="Afdeling" id="Afdeling">
+  		<option value="HR">Hr</option>
+  		<option value="Finance">Finance</option>
+	</select><br>
+
+
+       
+
+	<label for="Email">Email:</label><br>
+
+        <input type="text" id="Email" name="Email" required><br>
+
+        <input type="submit" value="Registreren">    </form>
+</body>
+</html>
